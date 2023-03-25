@@ -9,9 +9,9 @@ body {
 form {
   background: #2e2e2e;
   color: #d4d4d4;
-  position: fixed;
-  padding: 10px 20px;
-  font-size: larger;
+  /*position: fixed;*/
+  padding: 0px 20px;
+  font-size: 10px;
   bottom: 0;
   width: 100%;
 }
@@ -43,4 +43,30 @@ header p {
 }
 #messages li:nth-child(odd) {
   background: #d4d4d4;
+}
+
+.pages {
+  height: 30px;
+  /*background: green;*/
+}
+
+.page {
+  height: 30px;
+  background: rgb(218, 218, 218);
+  border: 1px solid black;
+  border-top-right-radius: 10%;
+  border-top-left-radius: 10%;
+  width: 80px;
+  text-align: center;
+  padding-top: 5px;
+  margin-left: 5px;
+}
+
+.page:hover {
+  cursor: pointer;
+}
+
+#draw, #canv {
+  background-color: white;
+  border: 1px solid black;
 }
