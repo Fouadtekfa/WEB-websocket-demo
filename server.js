@@ -34,11 +34,25 @@ wss.on('connection', function(client, request) {
 
   // Register a listener on each message of each connection
   client.on('message', function(message) {
-
-    var cli = '[' + decodeURIComponent(wsname) + '] ';
-    console.log("message from", cli);
-    // when receiving a message, broadcast it to all the connected clients
-    wss.broadcast(cli + message);
+    console.log("messageee");
+    console.log(message);
+    let messageObj = message;
+    try {
+      messageObj = JSON.parse(message);
+      
+      var cli = '[' + decodeURIComponent(wsname) + '] ';
+      let send = {
+        client : cli,
+        type : messageObj.type,
+        msg : messageObj.msg
+      }
+      // when receiving a message, broadcast it to all the connected clients
+      //wss.broadcast(cli+message);
+      let str = JSON.stringify(send);
+      wss.broadcast(str);
+    }catch(err) {
+      console.log(err);
+    }
   });
 });
 

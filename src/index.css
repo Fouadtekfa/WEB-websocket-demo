@@ -70,3 +70,27 @@ header p {
   background-color: white;
   border: 1px solid black;
 }
+
+#divColor:hover {
+  cursor: pointer;
+}
+
+#gome:hover {
+  cursor: pointer;
+}
+
+#pencil:hover {
+  cursor: pointer;
+}
+
+.pencilSelected{
+  background: #b2b2b2;
+  border-radius: 3px;
+  padding: 3px;
+  border: 1px solid #787575;
+}
+.gomeSelected{
+  background: #b2b2b2;
+  border-radius: 3px;
+  border: 1px solid #787575;
+}
