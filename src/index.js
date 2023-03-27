@@ -1,8 +1,11 @@
 import './index.css';
 import nameGenerator from './name-generator';
+import colorGenerator from "./color-generator";
 import isDef from './is-def';
   
 window.addEventListener("load", () => {
+    var globalColor = "";
+
     // Initialiser positions
     let initialX;
     let initialY;
@@ -53,11 +56,24 @@ window.addEventListener("load", () => {
       return false;
     });
 
-    if (isDef(wsname)) {
+    let wscolor = cookies.find(function(c) {
+        if (c.match(/color/) !== null) return true;
+        return false;
+    });
+
+    if (isDef(wsname) && isDef(wscolor)) {
       wsname = wsname.split('=')[1];
+      wscolor = wscolor.split('=')[1];
+      console.log("checking color");
+      console.log(wscolor);
+      globalColor = wscolor;
     } else {
       wsname = nameGenerator();
       document.cookie = "wsname=" + encodeURIComponent(wsname);
+
+      wscolor = colorGenerator();
+
+      document.cookie = "wscolor=" + encodeURIComponent(wscolor);
     }
 
     // Set the name in the header
@@ -82,28 +98,32 @@ window.addEventListener("load", () => {
 
       try {
         data = JSON.parse(event.data);
+          if(data.type) {
+              switch(data.type) {
+                  case "msg" : {
+                      line = document.createElement('li');
+                      line.textContent = data.client + data.msg;
+                      messages.appendChild(line);
+                      break;
+                  }
+                  case "canva" : {
+                      console.log(data);
+                      draw(data.msg);
+                  }
+              }
+          } else {
+              line = document.createElement('li');
+              line.textContent = data;
+              messages.appendChild(line);
+          }
       } catch(err) {
-        console.log(err);
+          console.log('cant do json');
+          line = document.createElement('li');
+          line.textContent = data;
+          messages.appendChild(line);
       }
 
-      if(data.type) {
-        switch(data.type) {
-          case "msg" : {
-            line = document.createElement('li');
-            line.textContent = data.client + data.msg;
-            messages.appendChild(line);    
-            break;
-          }
-          case "canva" : {
-            console.log(data);
-            draw(data.msg);
-          }
-        }
-      } else {
-        line = document.createElement('li');
-        line.textContent = data;
-        messages.appendChild(line);
-      }
+
     };
 
     // Retrieve the input element. Add listeners in order to send the content of the input when the "return" key is pressed.
@@ -127,7 +147,7 @@ window.addEventListener("load", () => {
     sendForm.addEventListener('submit', sendMessage, true);
     sendForm.addEventListener('blur', sendMessage, true);
 
-    const divColor = document.getElementById("divColor");
+    /*const divColor = document.getElementById("divColor");
   
     // Click sur le div color active l'input color
     divColor.addEventListener("click", function() {
@@ -139,10 +159,11 @@ window.addEventListener("load", () => {
       color.addEventListener("change", function() {
         $this.style.backgroundColor = this.value;
       });
-    });
+    });*/
 
   const sendPositionWS = (cursorX, cursorY, initialX, initialY) => {
-    const color = gomeselected ? "rgb(255, 255, 255)" : document.getElementById("color-picker").value;
+    //const color = gomeselected ? "rgb(255, 255, 255)" : document.getElementById("color-picker").value;
+    const color = globalColor;
     const stroke = gomeselected ? parseInt(document.getElementById("stroke").value) +2 : document.getElementById("stroke").value;
     console.log(color);
     
@@ -229,4 +250,6 @@ window.addEventListener("load", () => {
     initialX = newPositions.x;
     initialY = newPositions.y;
   } ;
+
+
 });
