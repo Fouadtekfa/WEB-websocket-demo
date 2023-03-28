@@ -63,6 +63,17 @@ header p {
   margin-left: 5px;
 }
 
+.delete {
+  padding: 2px;
+  color: white;
+  background-color: rgb(146, 5, 5);
+  width: 10px;
+  font-size: 7px;
+  margin-left: 4px;
+  border-radius: 50%;
+  display: inline-flex;
+}
+
 .activatedPage {
   background: rgb(61, 61, 61);
   color: white

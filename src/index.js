@@ -79,6 +79,12 @@ window.addEventListener("load", () => {
                     }
                   }
                 }
+                case "delete" : {
+                  document.getElementById("page_"+data.msg.id).remove();
+                  document.getElementById(data.msg.id).remove();
+                  const messages = document.querySelector('#messages_'+data.msg.id).parentNode;
+                  messages.remove();
+                }
             }
         }
     } catch(err) {
@@ -94,7 +100,7 @@ window.addEventListener("load", () => {
                   let display = count == 0 ? "" : "display : none;";
                   
                   if(count == 0) {
-                    if(!statusCreator) {
+                    if(!statusCreator && countPages > 1) {
                       display = "display : none;";
                     }
                   }
@@ -166,6 +172,7 @@ function createNewDessign(id, data) {
   let pagesContainer = document.getElementById("pageContainer");
   
   let page = document.createElement("div");
+  page.id="page_"+id;
   page.setAttribute("class", "page");
   let pagesAll = document.querySelectorAll(".page");
   
@@ -200,8 +207,15 @@ function createNewDessign(id, data) {
 
   // Reduce id for the text
   let idReduce = " ..."+idCanvas.substr(idCanvas.length-5, idCanvas.length);
-  let newContent = document.createTextNode("Canvas id:" + idReduce);
+  let newContent = document.createTextNode("  Canvas id:" + idReduce);
+  
+  let btnDelete = document.createElement("div");
+  btnDelete.classList.add("delete");
+  btnDelete.appendChild(document.createTextNode("X"));
+
+  page.appendChild(btnDelete); 
   page.appendChild(newContent); 
+  
   pagesContainer.insertBefore(page, newPageButton); // Append new window page
 
   // Initialiser positions
@@ -248,6 +262,23 @@ function createNewDessign(id, data) {
   // Listen to messages coming from the server. When it happens, create a new <li> and append it to the DOM.
   //const messages = document.querySelector('#messages');
   const messages = document.querySelector('#messages_'+id);
+
+    
+  btnDelete.addEventListener("click", function(){
+    console.log("Delete");
+    let obj = {
+      type : "delete",
+      msg : { id : id }
+    } 
+
+    page.remove();
+    canv.remove();
+    messages.parentNode.remove();
+
+    ws.send(JSON.stringify(obj)); 
+  });
+  
+
   let line;
 
   // Checking messages
@@ -443,7 +474,7 @@ function createUserInformation() {
       document.cookie = "wscolor=" + encodeURIComponent(wscolor);
       globalColor = wscolor;
     }
-      
+
     // Set the name in the header
     document.querySelector('header>p').textContent = decodeURIComponent(wsname);
   

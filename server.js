@@ -64,6 +64,10 @@ wss.on('connection', function(client, request) {
         }
       }
 
+      if(send.type == "delete") {
+        delete dataSave[send.msg.id];
+      }
+
       // when receiving a message, broadcast it to all the connected clients
       //wss.broadcast(cli+message);
       let str = JSON.stringify(send);
