@@ -7,6 +7,11 @@ let countPages = 0;
 let newPageButton = document.createElement("div");
 let globalColor = "";
 let statusCreator = false;
+let wscanvas = undefined;
+let objData = [];
+
+let idPage = new Date()+""; // id page generate by date
+
 window.addEventListener("load", () => {
   let pagesContainer = document.getElementById("pageContainer");
   newPageButton.classList.add("newDessin");
@@ -40,7 +45,14 @@ window.addEventListener("load", () => {
   });
 
   const ws = new WebSocket("ws://localhost:1234");
-  ws.onopen = (event) => { console.log("Canvas conected."); };
+  ws.onopen = (event) => { 
+    console.log("Canvas conected."); 
+    let obj = {
+      type : "dataRequest",
+      msg : { refresh : idPage }
+    } 
+    ws.send(JSON.stringify(obj)); 
+  };
   
   ws.onmessage = (event) => {
     console.log("on message");
@@ -51,16 +63,53 @@ window.addEventListener("load", () => {
         if(data.type) {
             switch(data.type) {
                 case "newCanvas" : {
+                  createElements(data.msg.id, 0, false);
+                  createNewDessign(data.msg.id);
+                  statusCreator = false;
+                  break;
+                }
+                case "dataRequest" : {
+                  // Request for the data stored in the server
+                  if(data.msg.refresh == idPage) { // Only if is the page we refreshed
+                    let count = 0;  
+                    for(let i in data.msg.history) { // Create all the canvas saved
+                      createElements(i, count, true);
+                      createNewDessign(i, data.msg.history[i]);
+                      count++;
+                    }
+                  }
+                }
+            }
+        }
+    } catch(err) {
+        console.log('err');
+        
+    }
+
+    function createElements(id, count, request) {
+                  countPages++;
                   // If is a new canvas create elements
-                  idCanvas = data.msg.id;
+                  idCanvas = id;
+
+                  let display = count == 0 ? "" : "display : none;";
                   
+                  if(count == 0) {
+                    if(!statusCreator) {
+                      display = "display : none;";
+                    }
+                  }
+
+                  if(request) {
+                    display = count > 0 ? "display : none;": "";
+                  }
+
                   // Create canvas
                   let canvasSection = document.getElementById("canvasSection");
                   const canv = document.createElement("canvas");
-                  canv.setAttribute("id", data.msg.id);
+                  canv.setAttribute("id", id);
                   canv.setAttribute("width", "1030px");
                   canv.setAttribute("height", "470px");
-                  canv.classList.style= "margin: 0 auto";
+                  canv.style= "margin: 0 auto; " + display;
                   canvasSection.appendChild(canv);
                   
                   let allmessages = document.querySelectorAll(".msgs");
@@ -74,12 +123,12 @@ window.addEventListener("load", () => {
                   divMessages.style = "height: 100%;";
                   divMessages.classList.add("msgs");
                   let ulMessages = document.createElement("ul");
-                  ulMessages.id = "messages_"+data.msg.id;
+                  ulMessages.id = "messages_"+id;
                   ulMessages.style = "height: 80%;";
                   ulMessages.classList.add("messages");
                   
                   let formMessages = document.createElement("form");
-                  formMessages.id = "formMsg_"+data.msg.id;
+                  formMessages.id = "formMsg_"+id;
                   
                   let inputMessages = document.createElement("input");
                   inputMessages.setAttribute("autocomplete", "off");
@@ -89,32 +138,30 @@ window.addEventListener("load", () => {
                   divMessages.appendChild(ulMessages);
                   divMessages.appendChild(formMessages);
                   messagesSection.appendChild(divMessages);
-
-                  createNewDessign(data.msg.id);
-                  statusCreator = false;
-                }
-            }
-        }
-    } catch(err) {
-        console.log('err');
-        
     }
-
 
   };
 
   createUserInformation();
 
+
+
 });
 
-function createNewDessign(id) {
-  //console.log("Create : " + id);
+function createNewDessign(id, data) {
   
-  // Recuperer le canvas et le context 2d
-  //const canv = document.getElementById("draw");
+  //console.log("Create : " + id);
+
+  
+  // Get canvas and 2d context
   const canv = document.getElementById(id);
   const context = canv.getContext("2d");
 
+  // If theres data draw it
+  if(data){
+    data.forEach(d => { draw(d, context); });
+  }
+  
   let activatedPages = document.querySelectorAll(".activatedPage");
   let pagesContainer = document.getElementById("pageContainer");
   
@@ -123,7 +170,6 @@ function createNewDessign(id) {
   let pagesAll = document.querySelectorAll(".page");
   
   // Change window in the creation only if is the creator
-  console.log(pagesAll.length);
   if(statusCreator || pagesAll.length == 1){
     activatedPages.forEach(p => {
       p.classList.remove("activatedPage");
@@ -152,10 +198,11 @@ function createNewDessign(id) {
     messages.style.heigth = "100%";
   });
 
+  // Reduce id for the text
   let idReduce = " ..."+idCanvas.substr(idCanvas.length-5, idCanvas.length);
   let newContent = document.createTextNode("Canvas id:" + idReduce);
-  page.appendChild(newContent)
-  pagesContainer.insertBefore(page, newPageButton);
+  page.appendChild(newContent); 
+  pagesContainer.insertBefore(page, newPageButton); // Append new window page
 
   // Initialiser positions
   let initialX;
@@ -222,7 +269,7 @@ function createNewDessign(id) {
                 case "canva" : {
                   // If is type canva, draw
                     //console.log(data);
-                    draw(data.msg);
+                    draw(data.msg, context);
                 }
             }
         } else {
@@ -290,6 +337,7 @@ const sendPositionWS = (cursorX, cursorY, initialX, initialY) => {
       
     }
   }
+
   ws.send(JSON.stringify(obj));
 }
 
@@ -305,15 +353,15 @@ const mouseDown = (evt) => {
   canv.addEventListener("mousemove", mouseMoving);
 };
 
-//Positions exactes
+// Exact Positions 
 const valueMouse = (x, y) => {
-  // Obtenir positions par rapport a la fenetre
+  // Get positions accordint to the window
   let rect = canv.getBoundingClientRect();
   let objX = rect.left;
   let objY = rect.top;
 
-  // Calculer la position de la souris par rapport à l'objet
-  // moin la position de l'objet par rapport à la fenêtre
+  // Calculate the mouse position accordint to the object
+  // minus the object position accordint to the window
   let relX = x - objX;
   let relY = y - objY;
 
@@ -323,24 +371,23 @@ const valueMouse = (x, y) => {
   };
 };
 
-// S'arreter quand on lache le boutton de la souris
+// Stop when we release the mouse button
 const mouseUp = () => {
   canv.removeEventListener("mousemove", mouseMoving);
 }
 
-// Mouvement de la souris 
+// Mouse mouvement
 const mouseMoving = (evt) => {
-  // Calculer x et y
+  // Calculate x et y
   let val = valueMouse(evt.clientX, evt.clientY);
-  //draw(val.x, val.y); // Dessiner
-  sendPositionWS(val.x, val.y, initialX, initialY); // Dessiner
+  sendPositionWS(val.x, val.y, initialX, initialY);
 }
 
 canv.addEventListener("mousedown", mouseDown);
 canv.addEventListener("mouseup", mouseUp);
 
-// Fonction pour dessiner
-function draw(obj) {
+// Draw in canvas function
+function draw(obj, context) {
   let newPositions = obj.newPositions;
   let initPositions = obj.initPositions;
   let style = obj.style;
@@ -360,7 +407,8 @@ function draw(obj) {
 
 function createUserInformation() {
     // Store/retrieve the name in/from a cookie.
-    const cookies = document.cookie.split(';');
+    let cookies = document.cookie.split(';');
+
     //console.log(cookies);
     let wsname = cookies.find(function(c) {
       if (c.match(/wsname/) !== null) return true;
@@ -370,6 +418,16 @@ function createUserInformation() {
     let wscolor = cookies.find(function(c) {
         if (c.match(/color/) !== null) return true;
         return false;
+    });
+
+    let countCanv = cookies.find(function(c) {
+      if (c.match(/countCanv/) !== null) return true;
+      return false;
+    });
+
+    let wscanvas = cookies.find(function(c) {
+      if (c.match(/wscanvas/) !== null) return true;
+      return false;
     });
   
     if (isDef(wsname) && isDef(wscolor)) {
@@ -385,7 +443,7 @@ function createUserInformation() {
       document.cookie = "wscolor=" + encodeURIComponent(wscolor);
       globalColor = wscolor;
     }
-  
+      
     // Set the name in the header
     document.querySelector('header>p').textContent = decodeURIComponent(wsname);
   

@@ -12,6 +12,8 @@ var wss = new WebSocketServer({
   server: server
 });
 
+var dataSave = {};
+
 // create a function to be able do broadcast messages to all WebSocket connected clients
 wss.broadcast = function broadcast(message) {
   wss.clients.forEach(function each(client) {
@@ -46,6 +48,22 @@ wss.on('connection', function(client, request) {
         type : messageObj.type,
         msg : messageObj.msg
       }
+
+      if(send.type == "canva") {
+        dataSave[send.msg.id] = dataSave[send.msg.id] ? dataSave[send.msg.id] : [];
+        dataSave[send.msg.id].push(send.msg);
+        //console.log(dataSave);
+      }
+
+      if(send.type == "dataRequest") {
+        /*console.log("send datasave");
+        console.log(dataSave);*/
+        send.msg = {
+          refresh : send.msg.refresh,
+          history : dataSave 
+        }
+      }
+
       // when receiving a message, broadcast it to all the connected clients
       //wss.broadcast(cli+message);
       let str = JSON.stringify(send);
