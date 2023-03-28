@@ -72,6 +72,8 @@ window.addEventListener("load", () => {
                   // Request for the data stored in the server
                   if(data.msg.refresh == idPage) { // Only if is the page we refreshed
                     let count = 0;  
+                    console.log(data);
+                    
                     for(let i in data.msg.history) { // Create all the canvas saved
                       createElements(i, count, true);
                       createNewDessign(i, data.msg.history[i]);
@@ -130,7 +132,7 @@ window.addEventListener("load", () => {
                   divMessages.classList.add("msgs");
                   let ulMessages = document.createElement("ul");
                   ulMessages.id = "messages_"+id;
-                  ulMessages.style = "height: 80%;";
+                  ulMessages.style = "height: 100%; overflow: auto;";
                   ulMessages.classList.add("messages");
                   
                   let formMessages = document.createElement("form");
@@ -154,7 +156,7 @@ window.addEventListener("load", () => {
 
 });
 
-function createNewDessign(id, data) {
+function createNewDessign(id, data = {}) {
   
   //console.log("Create : " + id);
 
@@ -164,8 +166,8 @@ function createNewDessign(id, data) {
   const context = canv.getContext("2d");
 
   // If theres data draw it
-  if(data){
-    data.forEach(d => { draw(d, context); });
+  if(data.canvas){
+    data.canvas.forEach(d => { draw(d, context); });
   }
   
   let activatedPages = document.querySelectorAll(".activatedPage");
@@ -284,36 +286,45 @@ function createNewDessign(id, data) {
   // Checking messages
   ws.onmessage = (event) => {
     console.log("on message");
-    let data = event.data;
+    let data_ = event.data;
     try {
-      data = JSON.parse(event.data);
-      if(data.msg.id == id) {
-        if(data.type) {
-            switch(data.type) {
+      data_ = JSON.parse(event.data);
+      if(data_.msg.id == id) {
+        if(data_.type) {
+            switch(data_.type) {
                 case "msg" : {
                     // If is a type message, add to the conversation
                     line = document.createElement('li');
-                    line.textContent = data.client + data.msg.message;
+                    line.textContent = data_.client + data_.msg.message;
                     messages.appendChild(line);
                     break;
                 }
                 case "canva" : {
                   // If is type canva, draw
                     //console.log(data);
-                    draw(data.msg, context);
+                    draw(data_.msg, context);
                 }
             }
         } else {
             line = document.createElement('li');
-            line.textContent = data;
+            line.textContent = data_;
             messages.appendChild(line);
         }
       }
     } catch(err) {
         console.log('cant do json');
         line = document.createElement('li');
-        line.textContent = data;
+        line.textContent = data_;
         messages.appendChild(line);
+
+        if(data.messages) {
+          data.messages.forEach(m => {
+            console.log(m);
+            line = document.createElement('li');
+            line.textContent = m;
+            messages.appendChild(line);
+          });
+        }
     }
 
 

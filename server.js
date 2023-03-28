@@ -36,8 +36,6 @@ wss.on('connection', function(client, request) {
 
   // Register a listener on each message of each connection
   client.on('message', function(message) {
-    //console.log("messageee");
-    //console.log(message);
     let messageObj = message;
     try {
       messageObj = JSON.parse(message);
@@ -50,14 +48,16 @@ wss.on('connection', function(client, request) {
       }
 
       if(send.type == "canva") {
-        dataSave[send.msg.id] = dataSave[send.msg.id] ? dataSave[send.msg.id] : [];
-        dataSave[send.msg.id].push(send.msg);
-        //console.log(dataSave);
+        dataSave[send.msg.id] = dataSave[send.msg.id] ? dataSave[send.msg.id] : { canvas : [], messages: []};
+        dataSave[send.msg.id].canvas.push(send.msg);
+      }
+
+      if(send.type == "msg") {
+        dataSave[send.msg.id] = dataSave[send.msg.id] ? dataSave[send.msg.id] : { canvas : [], messages: []};
+        dataSave[send.msg.id].messages.push(send.client + send.msg.message);
       }
 
       if(send.type == "dataRequest") {
-        /*console.log("send datasave");
-        console.log(dataSave);*/
         send.msg = {
           refresh : send.msg.refresh,
           history : dataSave 
