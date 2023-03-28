@@ -28,8 +28,9 @@
 
     <div id="root"></div>
       <header><p>???</p></header>
-      <div class="pages">
-        <div class="page">Page 1</div>
+
+      <div class="pages" style="display: flex;" id="pageContainer">
+        <!--<div class="page">Page 1</div>-->
       </div>
       <div style="padding: 10px; display: flex; height: 85vh; background-color: rgba(0, 0, 0, 0.842);">
         <section style="width: 80%; text-align: center;">
@@ -58,17 +59,16 @@
                   </div>
                 </div>
             </div>
-            <canvas id="draw" width="1030px" height="470px" style="margin: 0 auto;">
-
-            </canvas>
+            <div id="canvasSection" >
+              <!--
+              <canvas id="draw" width="1030px" height="470px" style="margin: 0 auto;">
+              </canvas>
+            -->
+            </div>
         </section>
-        <div style="width: 20%; padding: 10px; height: 100%; background-color: rgb(167, 167, 167); margin-left: 10px; border-radius: 3%;">
-          <ul id="messages" style="height: 80%;"></ul>
-          <form action="" id="formMsg">
-          &#10093; <input autofocus autocomplete="off" placeholder="Send a message"/>
-          </form>
+        <div id="messagesSection" style="width: 20%; padding: 10px; height: 100%; background-color: rgb(167, 167, 167); margin-left: 10px; border-radius: 3%;">
+          
         </div>
-
       </div>
   </body>
 </html>

@@ -32,16 +32,17 @@ header p {
   margin: 1em;
   color: #7a7a7a;
 }
-#messages {
+
+.messages {
   color: #2e2e2e;
   list-style-type: none;
   margin: 0 0 3em;
   padding: 0;
 }
-#messages li {
+.messages li {
   padding: 5px 20px;
 }
-#messages li:nth-child(odd) {
+.messages li:nth-child(odd) {
   background: #d4d4d4;
 }
 
@@ -56,17 +57,22 @@ header p {
   border: 1px solid black;
   border-top-right-radius: 10%;
   border-top-left-radius: 10%;
-  width: 80px;
+  width: 150px;
   text-align: center;
   padding-top: 5px;
   margin-left: 5px;
+}
+
+.activatedPage {
+  background: rgb(61, 61, 61);
+  color: white
 }
 
 .page:hover {
   cursor: pointer;
 }
 
-#draw, #canv {
+canvas, #canv {
   background-color: white;
   border: 1px solid black;
 }

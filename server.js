@@ -34,8 +34,8 @@ wss.on('connection', function(client, request) {
 
   // Register a listener on each message of each connection
   client.on('message', function(message) {
-    console.log("messageee");
-    console.log(message);
+    //console.log("messageee");
+    //console.log(message);
     let messageObj = message;
     try {
       messageObj = JSON.parse(message);
