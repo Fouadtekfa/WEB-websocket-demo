@@ -17,5 +17,6 @@ Ce projet est une démonstration simple de WebSocket permettant aux utilisateurs
 Chaque utilisateur est identifié par une couleur et un pseudonyme unique, et peut soit créer un nouveau dessin, soit rejoindre un dessin en cours.
 
 
-[!Demo](Demo.gif)
+
+![Demo](Demo.gif)
 
