@@ -18,5 +18,5 @@ Chaque utilisateur est identifié par une couleur et un pseudonyme unique, et pe
 
 
 
-![Demo](Demo.gif)
+![Demo](Demo2.gif)
 
